@@ -40,17 +40,47 @@ Do **not** use `raw.githubusercontent.com` — it serves `text/plain` with `nosn
 
 **Pin the viewer version per generated report.** Reports are long-lived; pointing at `@latest` means a future viewer refactor silently breaks every past report. Pin a tag at generation time.
 
-## Data contract (NOT YET LOCKED)
+## Data contract
 
-Schema-driven so the viewer is category-agnostic (hard drives today, a T-ball set tomorrow). Two parts:
+Schema-driven so the viewer is category-agnostic (hard drives today, a T-ball set tomorrow). Three types:
 
-- **`items[]`** — listings. A thin universal *spine* is typed: `landed_price`, `currency`, `venue`, `seller`, `url`, `flags[]`. Everything category-specific is free-form key/values.
-- **`facets[]`** — declares the axes: `{ id, label, type: numeric | categorical | range | boolean, unit? }`. The viewer builds the facet band from this; it never hardcodes product knowledge.
+```ts
+// One listing: a table row and a chart point.
+interface Item {
+  id: string;        // first 5 chars of hash(url) — dedupe + chart-point ↔ row
+  title: string;
+  price: number;     // item only, CAD — no shipping
+  shipping: number;  // CAD (0 = free)
+  duty?: number;     // customs estimate CAD, kept separate, never in price
+  venue: string;
+  seller?: string;
+  url: string;
+  flags: Flag[];
+  attrs: Record<string, string | number | boolean>;  // category-specific
+}
 
-Exact spine fields and facet schema are the next thing to settle.
+interface Flag { icon: string; kind: "good" | "warn"; label?: string; }
+
+// Declares one axis the facet band and chart can use.
+interface Facet {
+  id: string;        // "price" | "capacityTB" | "pricePerTB" …
+  label: string;
+  type: "numeric" | "categorical" | "boolean";
+  unit?: string;     // "CAD", "TB", "$/TB"
+}
+
+interface Report {
+  items: Item[];
+  facets: Facet[];
+  chart?: { x: string; y: string };  // facet ids; default = first two numeric
+}
+```
+
+- **Spine vs `attrs`** — the spine is the fields every product has; `attrs` holds the category-specific ones. A `Facet.id` resolves against the spine first, then `attrs`, so `price` is both a table column and a filterable/chartable axis with no special-casing.
+- **Derived** — `landed = price + shipping`; duty is shown beside it, never folded in.
+- **Flags** — the hunter's editorial annotations on a row (★ best, ⚠ caution): structured data lives in facets, judgment lives in flags.
 
 ## Open questions
 
-- Lock the data contract (spine fields, facet schema, identity key for dedupe + chart-point mapping).
 - Generator: thin CLI (`data.json` in, HTML out) vs the skill filling a template directly.
 - The skill's interface to all this — how the agent produces data and triggers report generation.

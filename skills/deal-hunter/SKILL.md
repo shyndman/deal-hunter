@@ -15,8 +15,8 @@ description: >
   transaction under any circumstances. The deliverable is a ranked set of product listings
   the user can buy from — nothing more.
 - You **MUST** find the best *landed price for a product that meets the user's needs* — not
-  the best product. The user cuts corners deliberately; respect that. Cheapest acceptable
-  beats best-in-class.
+  the best product. The user sometimes wants the best, sometimes wants the cheapest, but always 
+  wants a bunch of options.
 </prime_directive>
 
 <pipeline>
@@ -38,7 +38,7 @@ Run **before** talking to the user. Keep it shallow — no review-reading yet.
 - The user's primary marketplaces are **Amazon, AliExpress, and eBay**. You **SHOULD** start
   there, but **MUST** widen the venue set for categories those stores serve poorly (e.g. a
   children's T-ball set) — discover where that product is actually sold.
-- Boil the ocean within reason — on the order of ~10 venues for a broad search. The exact
+- Don't boil the ocean -- but definitely heat it up a few degrees — on the order of ~10 venues for a broad search. The exact
   number is not prescribed; cover the space properly without going absurd.
 </stage_recon>
 
@@ -95,37 +95,14 @@ The brief decides the hunt's shape:
   (no conversion)**, ship-from country, seller/rating, stock, key specs against the brief,
   and the listing URL. Store-agents **MUST NOT** convert currencies — that is the
   orchestrator's job.
-</stage_hunt>
-
-<normalization>
-Normalization is **solely the orchestrator's responsibility** — store-agents return native
-prices untouched. Every price shown to the user is a **landed price**. For each listing, the
-orchestrator:
-
-- You **MUST** convert to **CAD** using the latest exchange rate from **x-rates.com**, and
-  note the rate/source.
-- You **MUST** fold **shipping into the displayed price** — the headline number is
-  item + shipping in CAD.
-- You **MUST** estimate **customs/duties whenever the item crosses the Canadian border**
-  (ship-from country ≠ ship-to country), and **show it broken out separately** from the
-  landed price — never baked in. Label it an **estimate** and note it varies with how the
-  seller declares/ships the goods.
-- When ship-to is **Buffalo** (the hand-carry route), the item is **US-domestic**: price it
-  with US shipping and **no Canadian customs** (personal hand-carried goods). Show this
-  landed-to-Buffalo total **alongside** the landed-to-Toronto total so the real savings are
-  visible.
-</normalization>
-
-<ranking_and_output>
-- You **MUST** rank **price-first within the set of listings that meet the brief**. Do not
-  promote a pricier "better" product over a cheaper one that satisfies the stated needs.
-- You **MUST** dedupe the same product across venues.
-- Output is a **ranked markdown table in chat** — no saved report, no images (deferred).
-  Columns: product/model, landed price (CAD, shipping in), customs estimate (separate),
-  key specs, seller/venue, and a short why-this-one. Include the live listing link per row.
-</ranking_and_output>
-
-<bot_blocks_and_failures>
+- You **SHOULD** gather a **fuller, more varied set**, not just the cheapest few — span the
+  spec range, conditions, sellers, and venues. A denser set with real spread shows the shape
+  of the market; a thin list of the absolute-cheapest hides it.
+- You **MUST** record **how you gathered** — queries run, filters applied, what you skipped
+  and why, where you stopped. It need not be statistical; a stated, gut-level rationale is
+  enough. An undescribed pile of listings is not a meaningful set.
+  
+## Bot Blocks & Failures
 Default browsing is **headless**. The user does not talk to store-agents directly — only the
 orchestrator does.
 
@@ -144,4 +121,38 @@ orchestrator does.
   that strategy. Workarounds risk getting the account banned.
 - The orchestrator **MUST** surface those failures to the user **live**, mid-hunt, so a fix
   or alternative strategy can be applied before the final table is written.
-</bot_blocks_and_failures>
+</stage_hunt>
+
+<stage_normalize>
+Normalization is **solely the orchestrator's responsibility** — store-agents return native
+prices untouched. Every price shown to the user is a **landed price**. For each listing, the
+orchestrator:
+
+- You **MUST** convert to **CAD** using the latest exchange rate from **x-rates.com**, and
+  note the rate/source.
+- You **MUST** fold **shipping into the displayed price** — the headline number is
+  item + shipping in CAD.
+- You **MUST** estimate **customs/duties whenever the item crosses the Canadian border**
+  (ship-from country ≠ ship-to country), and **show it broken out separately** from the
+  landed price — never baked in. Label it an **estimate** and note it varies with how the
+  seller declares/ships the goods.
+- When ship-to is **Buffalo** (the hand-carry route), the item is **US-domestic**: price it
+  with US shipping and **no Canadian customs** (personal hand-carried goods). Show this
+  landed-to-Buffalo total **alongside** the landed-to-Toronto total so the real savings are
+  visible.
+</stage_normalize>
+
+<stage_rank>
+- You **MUST** rank **price-first within the set of listings that meet the brief**. Do not
+  promote a pricier "better" product over a cheaper one that satisfies the stated needs.
+- You **MUST** dedupe the same product across venues.
+- Output is a **ranked markdown table in chat** — no saved report, no images (deferred).
+  Columns: product/model, landed price (CAD, shipping in), customs estimate (separate),
+  key specs, seller/venue, and a short why-this-one. Include the live listing link per row.
+</stage_rank>
+
+<report>
+Turning a completed hunt into a standalone, shareable report — verdict, winner, educational
+prose around the ranked listings — is governed by a separate skill. Read
+`skill://deal-reporter` when writing one.
+</report>
