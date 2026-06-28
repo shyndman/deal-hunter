@@ -95,6 +95,12 @@ The brief decides the hunt's shape:
   (no conversion)**, ship-from country, seller/rating, stock, key specs against the brief,
   and the listing URL. Store-agents **MUST NOT** convert currencies — that is the
   orchestrator's job.
+- For **cross-border listings**, also capture two signals that decide customs exposure: **how
+  it ships** — the seller's own label vs **marketplace-managed international shipping** (e.g.
+  eBay International Shipping, where the marketplace sets the declared value and collects tax
+  at checkout) — and **seller type** — an individual/small seller vs a large reseller (C2 and
+  the like) or the marketplace itself. These tell the orchestrator whether the customs
+  declaration is the seller's to shade (see **"Motherboard USA"** in normalize).
 - On **AliExpress, Temu, DHgate, Banggood, and Alibaba** — image-heavy stores that lean on
   images over text — you **MUST** open and read **several product images**
   before trusting a listing. The information you need is often locked in images, and not just
@@ -143,6 +149,16 @@ orchestrator:
   (ship-from country ≠ ship-to country), and **show it broken out separately** from the
   landed price — never baked in. Label it an **estimate** and note it varies with how the
   seller declares/ships the goods.
+- **"Motherboard USA"** — when a listing crosses the border **and** the seller controls the
+  declaration (individual/small seller on their own label — **not** marketplace-managed
+  shipping, **not** a compliant reseller), under-declaration is a real possibility: such
+  sellers routinely write a low value to keep buyers loyal (one declared a 3090 as
+  "Motherboard USA"). For these listings you **MUST** show the customs/tax line as a
+  **range**: tax at the **full declared value** (the honest high end) and tax at a
+  **likely-declared value of CAD $100** (the optimistic low end). The headline landed price
+  **MUST** stay anchored to the **full** value — never the optimistic one. Flag the row
+  **"Motherboard USA"**. For marketplace-managed or compliant-reseller listings the lever is
+  gone — show a single number, no range.
 - When ship-to is **Buffalo** (the hand-carry route), the item is **US-domestic**: price it
   with US shipping and **no Canadian customs** (personal hand-carried goods). Show this
   landed-to-Buffalo total **alongside** the landed-to-Toronto total so the real savings are
@@ -153,8 +169,15 @@ orchestrator:
 - You **MUST** rank **price-first within the set of listings that meet the brief**. Do not
   promote a pricier "better" product over a cheaper one that satisfies the stated needs.
 - You **MUST** dedupe the same product across venues.
+- A **"Motherboard USA"** listing is ranked partly on its **optimistic** landed cost, so a
+  likely under-declaration **MAY** move it above a pricier compliant listing — but you
+  **MUST** call this out in the row's why-this-one and keep the full-value price visible. The
+  boost **tapers with the size of the upside**: a large tax saving (a $5000 card) earns a real
+  lift; a small one barely moves the order. There is **no hard threshold** — show the range
+  whenever the lever exists; it simply matters less when the upside is small.
 - Output is a **ranked markdown table in chat** — no saved report, no images (deferred).
-  Columns: product/model, landed price (CAD, shipping in), customs estimate (separate),
+  Columns: product/model, landed price (CAD, shipping in), customs estimate (separate; a
+  range on **"Motherboard USA"** rows),
   key specs, seller/venue, and a short why-this-one. Include the live listing link per row.
 </stage_rank>
 
