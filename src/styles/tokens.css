@@ -1,0 +1,37 @@
+/* Design tokens — lifted from Components.dc.html · Frame F1 (Foundations).
+   Two type registers: Newsreader (document voice) + IBM Plex Sans/Mono (tool voice). */
+
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  /* Surfaces */
+  --paper: #f4f1ea;
+  --panel: #fffdf8;
+  --tool: #fbfaf5;
+
+  /* Ink */
+  --ink: #23201b;
+  --ink2: #6f6658;
+  --ink3: #9a9182;
+
+  /* Hairlines */
+  --line: #e4ded1;
+  --line2: #ece7db;
+
+  /* Accents */
+  --accent: #2a6fdb;
+  --accent-bg: #e9f0fc;
+  --good: #1f7a52;
+  --warn: #a9740f;
+
+  /* Type families */
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --serif: "Newsreader", Georgia, serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
