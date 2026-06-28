@@ -29,3 +29,14 @@ reader described above.
 - Keep it tied to **this hunt** — explain the dimensions that actually shaped this search and
   ranking, not a general essay on the category.
 </educational_content>
+
+<editing>
+A generated report is a starting point, not a final artifact. Some content — a bespoke
+educational diagram, a hand-drawn comparison, an aside the schema can't model — is worth
+adding by hand after generation. You are **encouraged** to open the report and do so.
+
+- This only works if the generated markup is **tight**: clean, semantic, minimal, no
+  machinery in the way. You **MUST** emit markup an editor can scan and extend at a glance.
+- Each section **MUST** be a self-contained block you can copy, move, or drop a sibling
+  beside without touching anything else.
+</editing>
