@@ -95,6 +95,13 @@ The brief decides the hunt's shape:
   (no conversion)**, ship-from country, seller/rating, stock, key specs against the brief,
   and the listing URL. Store-agents **MUST NOT** convert currencies — that is the
   orchestrator's job.
+- On **AliExpress, Temu, DHgate, Banggood, and Alibaba** — image-heavy stores that lean on
+  images over text — you **MUST** open and read **several product images**
+  before trusting a listing. The information you need is often locked in images, and not just
+  the gallery: these stores bury specs in the **description section as images**, so read those
+  too. Products are frequently mislabeled or misleading, so this verification is what
+  separates a real match from a false positive. **Do not** take a listing at its title/spec
+  text alone — confirm against the images that it is actually the product you think it is.
 - You **SHOULD** gather a **fuller, more varied set**, not just the cheapest few — span the
   spec range, conditions, sellers, and venues. A denser set with real spread shows the shape
   of the market; a thin list of the absolute-cheapest hides it.
