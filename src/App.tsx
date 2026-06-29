@@ -17,6 +17,7 @@ export default function App() {
   const [version, setVersion] = createSignal(0);
   const [hoveredId, setHoveredId] = createSignal<string | null>(null);
   const [selectedId, setSelectedId] = createSignal<string | null>(null);
+  const [scrollHoverId, setScrollHoverId] = createSignal<string | null>(null);
 
   const numericFacets = dataset.facets.filter((f) => f.type === "numeric");
   const [axes, setAxes] = createSignal<ChartAxes>({ x: dataset.chart.x, y: dataset.chart.y });
@@ -45,6 +46,14 @@ export default function App() {
   };
   const onSelect = (id: string): void => {
     setSelectedId((prev) => (prev === id ? null : id));
+  };
+  const onChartHover = (id: string | null): void => {
+    setHoveredId(id);
+    setScrollHoverId(id);
+  };
+  const onTableHover = (id: string | null): void => {
+    setHoveredId(id);
+    setScrollHoverId(null);
   };
   const swapAxes = (): void => {
     const a = axes();
@@ -83,7 +92,7 @@ export default function App() {
         matchedIds={matchedIds}
         hoveredId={hoveredId}
         selectedId={selectedId}
-        onHover={setHoveredId}
+        onHover={onChartHover}
         onSelect={onSelect}
       />
       <Table
@@ -93,7 +102,8 @@ export default function App() {
         rows={filtered}
         hoveredId={hoveredId}
         selectedId={selectedId}
-        onHover={setHoveredId}
+        onHover={onTableHover}
+        scrollHoverId={scrollHoverId}
         onSelect={onSelect}
       />
     </>

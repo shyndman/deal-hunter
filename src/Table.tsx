@@ -13,11 +13,15 @@ interface Props {
   rows: Accessor<Item[]>;
   hoveredId: Accessor<string | null>;
   selectedId: Accessor<string | null>;
+  scrollHoverId: Accessor<string | null>;
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
 }
 
 type TableRow = Record<string, unknown>;
+
+const SCROLL_EDGE_ROW_COUNT = 2;
+const TABULATOR_TABLEHOLDER_SELECTOR = ".tabulator-tableholder";
 
 export default function Table(props: Props) {
   let el!: HTMLDivElement;
@@ -78,6 +82,70 @@ export default function Table(props: Props) {
     let pending: Item[] | null = null;
     let curHover: string | null = null;
     let curSelected: string | null = null;
+    let scrollRequest = 0;
+    let hoverRestoreTop: number | null = null;
+    const getHolder = (): HTMLElement | null =>
+      el.querySelector<HTMLElement>(TABULATOR_TABLEHOLDER_SELECTOR);
+    const getRow = (id: string): RowComponent | null => {
+      try {
+        const row = table.getRow(id) as RowComponent | false;
+        return row === false ? null : row;
+      } catch {
+        return null;
+      }
+    };
+    const cancelPendingScroll = (): void => {
+      scrollRequest += 1;
+    };
+    const scrollRowIntoPaddedView = async (id: string, request: number): Promise<void> => {
+      const row = getRow(id);
+      if (row === null) return;
+      try {
+        await row.scrollTo("nearest", false);
+      } catch {
+        return;
+      }
+      if (request !== scrollRequest) return;
+      const holder = getHolder();
+      if (holder === null) return;
+      const rowEl = row.getElement();
+      const rowHeight = rowEl.offsetHeight;
+      if (rowHeight <= 0) return;
+      const edgePadding = rowHeight * SCROLL_EDGE_ROW_COUNT;
+      const rowTop = rowEl.offsetTop;
+      const rowBottom = rowTop + rowHeight;
+      const safeTop = holder.scrollTop + edgePadding;
+      const safeBottom = holder.scrollTop + holder.clientHeight - edgePadding;
+      if (rowTop < safeTop) {
+        holder.scrollTop = Math.max(0, rowTop - edgePadding);
+      } else if (rowBottom > safeBottom) {
+        holder.scrollTop = Math.max(0, rowBottom + edgePadding - holder.clientHeight);
+      }
+    };
+    const startPaddedScroll = (id: string): void => {
+      const request = ++scrollRequest;
+      void scrollRowIntoPaddedView(id, request);
+    };
+    const restoreHoverScroll = (): void => {
+      cancelPendingScroll();
+      const holder = getHolder();
+      if (hoverRestoreTop !== null && holder !== null) holder.scrollTop = hoverRestoreTop;
+      hoverRestoreTop = null;
+    };
+    const setHoverScroll = (id: string | null): void => {
+      if (id === null) {
+        restoreHoverScroll();
+        return;
+      }
+      const holder = getHolder();
+      const row = getRow(id);
+      if (holder === null || row === null) {
+        restoreHoverScroll();
+        return;
+      }
+      if (hoverRestoreTop === null) hoverRestoreTop = holder.scrollTop;
+      startPaddedScroll(id);
+    };
 
     const setHover = (id: string | null): void => {
       const prev = curHover;
@@ -158,7 +226,15 @@ export default function Table(props: Props) {
       }
     });
     createEffect(() => setHover(props.hoveredId()));
-    createEffect(() => setSelected(props.selectedId()));
+    createEffect(() => {
+      const id = props.selectedId();
+      setSelected(id);
+      if (id !== null) {
+        hoverRestoreTop = null;
+        startPaddedScroll(id);
+      }
+    });
+    createEffect(() => setHoverScroll(props.scrollHoverId()));
 
     onCleanup(() => table.destroy());
   });
