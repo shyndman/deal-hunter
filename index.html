@@ -1,20 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Deal Hunter — Components</title>
-  <style>
-    body { margin: 0; background: var(--paper); padding: 40px; }
-    #app { display: flex; gap: 36px; align-items: flex-start; flex-wrap: wrap; }
-    .col { display: flex; flex-direction: column; gap: 32px; width: 620px; max-width: 100%; }
-    .col--wide { width: 760px; }
-    .frame { margin: 0; }
-    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <script type="module" src="/src/showcase.ts"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>deal-hunter — slice & dice</title>
+    <style>
+      #table .tabulator-row.deal-hover {
+        background-color: #fff3bf;
+      }
+      #table .tabulator-row.tabulator-selected {
+        background-color: #d0ebff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

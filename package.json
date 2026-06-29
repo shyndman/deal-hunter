@@ -1,15 +1,26 @@
 {
   "name": "deal-hunter-viewer",
   "version": "0.1.0",
-  "description": "Interactive, DigiKey-style report viewer for deal-hunter output",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check": "tsx src/engine.check.ts"
+  },
+  "dependencies": {
+    "crossfilter2": "^1.5.4",
+    "echarts": "^5.5.1",
+    "solid-js": "^1.9.13",
+    "tabulator-tables": "^6.3.0"
   },
   "devDependencies": {
+    "@types/node": "^26.0.1",
+    "@types/tabulator-tables": "^6.2.4",
+    "tsx": "^4.22.4",
     "typescript": "^5.6.3",
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "vite-plugin-solid": "^2.11.12"
   }
 }
