@@ -7,6 +7,11 @@ import Band from "./Band";
 import Chart from "./Chart";
 import Table from "./Table";
 
+interface ChartAxes {
+  readonly x: string;
+  readonly y: string;
+}
+
 export default function App() {
   const engine = new Engine(dataset.items, dataset.facets);
   const [version, setVersion] = createSignal(0);
@@ -14,8 +19,19 @@ export default function App() {
   const [selectedId, setSelectedId] = createSignal<string | null>(null);
 
   const numericFacets = dataset.facets.filter((f) => f.type === "numeric");
-  const [axisX, setAxisX] = createSignal(dataset.chart.x);
-  const [axisY, setAxisY] = createSignal(dataset.chart.y);
+  const [axes, setAxes] = createSignal<ChartAxes>({ x: dataset.chart.x, y: dataset.chart.y });
+  const axisX = (): string => axes().x;
+  const axisY = (): string => axes().y;
+  const setAxisX = (x: string): void => {
+    const a = axes();
+    if (x !== a.y) setAxes({ x, y: a.y });
+  };
+  const setAxisY = (y: string): void => {
+    const a = axes();
+    if (y !== a.x) setAxes({ x: a.x, y });
+  };
+  const axisXOptions = createMemo(() => numericFacets.filter((f) => f.id !== axisY()));
+  const axisYOptions = createMemo(() => numericFacets.filter((f) => f.id !== axisX()));
 
   const filtered = createMemo<Item[]>(() => {
     version();
@@ -30,6 +46,10 @@ export default function App() {
   const onSelect = (id: string): void => {
     setSelectedId((prev) => (prev === id ? null : id));
   };
+  const swapAxes = (): void => {
+    const a = axes();
+    setAxes({ x: a.y, y: a.x });
+  };
 
   return (
     <>
@@ -38,16 +58,18 @@ export default function App() {
         <label>
           X{" "}
           <select value={axisX()} onChange={(e) => setAxisX(e.currentTarget.value)}>
-            <For each={numericFacets.filter((f) => f.id !== axisY())}>
+            <For each={axisXOptions()}>
               {(f) => <option value={f.id}>{f.label}</option>}
             </For>
           </select>
         </label>{" "}
-        <button onClick={() => { const x = axisX(); setAxisX(axisY()); setAxisY(x); }}>⇄</button>{" "}
+        <button type="button" onClick={swapAxes} aria-label="Swap axes">
+          ⇄
+        </button>{" "}
         <label>
           Y{" "}
           <select value={axisY()} onChange={(e) => setAxisY(e.currentTarget.value)}>
-            <For each={numericFacets.filter((f) => f.id !== axisX())}>
+            <For each={axisYOptions()}>
               {(f) => <option value={f.id}>{f.label}</option>}
             </For>
           </select>

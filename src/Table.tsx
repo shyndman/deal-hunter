@@ -17,6 +17,8 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
+type TableRow = Record<string, unknown>;
+
 export default function Table(props: Props) {
   let el!: HTMLDivElement;
 
@@ -28,8 +30,13 @@ export default function Table(props: Props) {
       const yf = facets.find((f) => f.id === props.axisY())!;
       return `${unitOrLabel(yf)}/${unitOrLabel(xf)}`;
     };
-    const rowOf = (it: Item): Record<string, unknown> => {
-      const r: Record<string, unknown> = {
+    const ratioOf = (row: TableRow): number | undefined => {
+      const xv = row[`f_${props.axisX()}`];
+      const yv = row[`f_${props.axisY()}`];
+      return typeof xv === "number" && typeof yv === "number" && xv !== 0 ? yv / xv : undefined;
+    };
+    const rowOf = (it: Item): TableRow => {
+      const r: TableRow = {
         title: it.title,
         id: it.id,
         venue: it.venue,
@@ -38,9 +45,6 @@ export default function Table(props: Props) {
         url: it.url,
       };
       for (const f of facets) r[`f_${f.id}`] = resolve(it, f.id);
-      const xv = resolve(it, props.axisX());
-      const yv = resolve(it, props.axisY());
-      r.ratio = typeof xv === "number" && typeof yv === "number" && xv !== 0 ? yv / xv : undefined;
       return r;
     };
 
@@ -59,9 +63,11 @@ export default function Table(props: Props) {
       {
         title: ratioTitle(),
         field: "ratio",
-        sorter: "number",
+        sorter: (_a: unknown, _b: unknown, aRow: RowComponent, bRow: RowComponent): number =>
+          (ratioOf(aRow.getData() as TableRow) ?? Number.NEGATIVE_INFINITY) -
+          (ratioOf(bRow.getData() as TableRow) ?? Number.NEGATIVE_INFINITY),
         formatter: (cell: CellComponent) => {
-          const v = cell.getValue();
+          const v = ratioOf(cell.getRow().getData() as TableRow);
           return typeof v === "number" ? v.toFixed(2) : "";
         },
       },
@@ -135,12 +141,21 @@ export default function Table(props: Props) {
 
     createEffect(() => {
       const rows = props.rows();
+      if (built) void table.replaceData(rows.map(rowOf)).then(reapply);
+      else pending = rows;
+    });
+    createEffect(() => {
       props.axisX();
       props.axisY();
       if (built) {
-        table.getColumn("ratio")?.updateDefinition({ title: ratioTitle() });
-        void table.replaceData(rows.map(rowOf)).then(reapply);
-      } else pending = rows;
+        const column = table.getColumn("ratio");
+        column?.getElement().querySelector(".tabulator-col-title")?.replaceChildren(ratioTitle());
+        column?.getCells().forEach((cell) => {
+          const v = ratioOf(cell.getRow().getData() as TableRow);
+          cell.getElement().textContent = typeof v === "number" ? v.toFixed(2) : "";
+        });
+        reapply();
+      }
     });
     createEffect(() => setHover(props.hoveredId()));
     createEffect(() => setSelected(props.selectedId()));
