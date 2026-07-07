@@ -41463,7 +41463,11 @@ class t4 extends an {
 }
 class i4 extends an {
   build(e) {
-    const t = this.getAttribute("heading");
+    const t = this.getAttribute("heading"), r = e.some((n) => n instanceof Element || n instanceof Text && n.data.trim() !== "");
+    if (t === null && !r) {
+      this.style.display = "none";
+      return;
+    }
     t !== null && this.append(je("span", "rpt-label", t)), this.append(wi("div", "dh-infographic__body", e));
   }
 }
